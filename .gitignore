@@ -60,12 +60,6 @@ data/temp/
 *.tar
 *.rar
 
-# Outputs and runs
-outputs/*
-!outputs/.gitkeep
-runs/*
-!runs/.gitkeep
-
 # Model weights
 model/*.pt
 model/*.onnx
