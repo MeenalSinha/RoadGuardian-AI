@@ -1,72 +1,25 @@
-# ----------------------------
-# PYTHON BUILD / CACHE FILES
-# ----------------------------
+# Ignore Python cache and virtual envs
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.so
-*.egg-info/
-*.log
-*.tmp
-*.cache
-*.sqlite3
-
-# ----------------------------
-# ENVIRONMENTS
-# ----------------------------
 venv/
 env/
-.venv/
-ENV/
-.ipynb_checkpoints/
-.idea/
-.vscode/
 
-# ----------------------------
-# DATA & OUTPUTS
-# ----------------------------
+# Ignore only raw and temp data (not processed or outputs)
 data/raw/
 data/processed/
-data/temp/
-data/downloads/
-data/*.zip
-data/*.tar*
-data/*.rar
-data/*.csv
-data/*.json
-data/*.txt
-data/*.yaml
-!data/yolo/dataset.yaml   # Keep dataset config
 
-outputs/*
-!outputs/.gitkeep         # Keep empty structure for GitHub
+# Keep all models (do NOT exclude .pt or .onnx)
+# model/*.pt
+# model/*.onnx
 
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
+# Keep outputs folder
+# outputs/
 
-# Virtual environments
-venv/
-env/
-.venv/
-
-# Data and heavy assets
-data/raw/
-data/processed/
-data/temp/
-*.zip
-*.tar
-*.rar
-
-# Model weights
-model/*.pt
-model/*.onnx
-model/*.tflite
-
-# Kaggle and system files
+# Ignore experiment runs and cache
+runs/
 .kaggle/
 kaggle.json
+
+# Ignore OS junk files
 .DS_Store
 Thumbs.db
