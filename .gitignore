@@ -1,0 +1,78 @@
+# ----------------------------
+# PYTHON BUILD / CACHE FILES
+# ----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.log
+*.tmp
+*.cache
+*.sqlite3
+
+# ----------------------------
+# ENVIRONMENTS
+# ----------------------------
+venv/
+env/
+.venv/
+ENV/
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# ----------------------------
+# DATA & OUTPUTS
+# ----------------------------
+data/raw/
+data/processed/
+data/temp/
+data/downloads/
+data/*.zip
+data/*.tar*
+data/*.rar
+data/*.csv
+data/*.json
+data/*.txt
+data/*.yaml
+!data/yolo/dataset.yaml   # Keep dataset config
+
+outputs/*
+!outputs/.gitkeep         # Keep empty structure for GitHub
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Data and heavy assets
+data/raw/
+data/processed/
+data/temp/
+*.zip
+*.tar
+*.rar
+
+# Outputs and runs
+outputs/*
+!outputs/.gitkeep
+runs/*
+!runs/.gitkeep
+
+# Model weights
+model/*.pt
+model/*.onnx
+model/*.tflite
+
+# Kaggle and system files
+.kaggle/
+kaggle.json
+.DS_Store
+Thumbs.db

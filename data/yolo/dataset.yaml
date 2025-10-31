@@ -1,0 +1,8 @@
+names:
+- pothole
+- crack
+- damage
+nc: 3
+path: D:\pothole_detection_project\data\yolo
+train: train/images
+val: val/images
