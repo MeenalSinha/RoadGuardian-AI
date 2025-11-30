@@ -9,8 +9,6 @@
 
 **Real-time road defect detection using deep learning to improve road safety and infrastructure maintenance.**
 
-[Demo](#-demo) • [Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [Results](#-results)
-
 </div>
 
 ---
@@ -18,7 +16,6 @@
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
-- [Demo](#-demo)
 - [Key Features](#-features)
 - [Performance Metrics](#-performance-metrics)
 - [Quick Start](#-quick-start)
@@ -29,7 +26,6 @@
 - [Results](#-results)
 - [Documentation](#-documentation)
 - [Project Structure](#-project-structure)
-- [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Contact](#-contact)
@@ -49,38 +45,6 @@
 - 📊 **RCI Calculation:** Automated Road Condition Index scoring
 - 🌐 **Production Ready:** Streamlit web interface included
 - 📱 **Deployable:** Docker support, cloud-ready
-
----
-
-## 🎬 Demo
-
-### Web Application
-
-![Detection Example](outputs/sample_results/detection_example.jpg)
-
-**Live Demo:** [Try it here](#) *(Coming soon)*
-
-### Sample Detection Results
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="outputs/sample_results/result_1.jpg" width="300px"/><br/>
-      <b>Urban Road Detection</b><br/>
-      Detected: 8 potholes, 3 cracks
-    </td>
-    <td align="center">
-      <img src="outputs/sample_results/result_2.jpg" width="300px"/><br/>
-      <b>Highway Monitoring</b><br/>
-      Detected: 5 damage areas
-    </td>
-    <td align="center">
-      <img src="outputs/sample_results/result_3.jpg" width="300px"/><br/>
-      <b>Rural Road Analysis</b><br/>
-      Detected: 12 defects
-    </td>
-  </tr>
-</table>
 
 ---
 
@@ -130,7 +94,7 @@
 
 ## 📊 Performance Metrics
 
-### Model Performance (v2.0)
+### Model Performance
 
 | Metric | Value | Status |
 |--------|-------|--------|
@@ -377,7 +341,6 @@ For complete model documentation, see [model/model_card.md](model/model_card.md)
 - **Total Images:** 18,717
 - **Sources:**
   - Primary dataset: 18,052 images
-  - [Kaggle Annotated Potholes](https://www.kaggle.com/datasets/chitholian/annotated-potholes-dataset): 665 images
 
 ### Classes
 
@@ -406,38 +369,6 @@ For complete model documentation, see [model/model_card.md](model/model_card.md)
 
 ## 🎯 Results
 
-### Validation Results
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="outputs/training_curves.png" width="400px"/><br/>
-      <b>Training Curves</b>
-    </td>
-    <td align="center">
-      <img src="outputs/confusion_matrix.png" width="400px"/><br/>
-      <b>Confusion Matrix</b>
-    </td>
-  </tr>
-</table>
-
-### Detection Examples
-
-#### Urban Roads
-- Average detections: 20-30 per image
-- Accuracy: 85%
-- Common: Potholes, cracks
-
-#### Rural Roads  
-- Average detections: 15-25 per image
-- Accuracy: 78%
-- Common: Large potholes, damage
-
-#### Highways
-- Average detections: 10-15 per image
-- Accuracy: 82%
-- Common: Cracks, minor damage
-
 ### Confidence Distribution
 
 | Confidence Range | Percentage | Quality |
@@ -465,15 +396,6 @@ Comprehensive documentation available:
 - 📕 **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment
 - 📙 **[Model Card](model/model_card.md)** - Detailed model documentation
 
-### Quick Links
-
-- [Installation Instructions](docs/SETUP.md#installation)
-- [Usage Examples](docs/SETUP.md#usage)
-- [Training from Scratch](docs/TRAINING.md)
-- [API Documentation](docs/DEPLOYMENT.md#api-deployment)
-- [Docker Deployment](docs/DEPLOYMENT.md#docker-deployment)
-- [Troubleshooting](docs/SETUP.md#troubleshooting)
-
 ---
 
 ## 📁 Project Structure
@@ -493,10 +415,6 @@ pothole-detection/
 │   └── model_card.md                    # Model documentation
 │
 ├── 📁 data/
-│   ├── sample_images/                   # Test images
-│   │   ├── pothole1.jpg
-│   │   ├── pothole2.jpg
-│   │   └── road1.jpg
 │   └── dataset.yaml                     # Dataset configuration
 │
 ├── 📁 outputs/
@@ -517,33 +435,6 @@ pothole-detection/
     ├── download_kaggle_data.py          # Dataset download
     └── test_model.py                    # Model testing
 ```
-
----
-
-## 🗺️ Roadmap
-
-### Version 2.1 (Next Release)
-- [ ] Model export to ONNX/TensorRT
-- [ ] Mobile deployment (iOS/Android)
-- [ ] Video processing support
-- [ ] Enhanced RCI calculation
-
-### Version 3.0 (Future)
-- [ ] Upgrade to YOLOv8m (85-90% mAP target)
-- [ ] Depth estimation for severity
-- [ ] Multi-camera support
-- [ ] Real-time streaming
-- [ ] API server with FastAPI
-- [ ] Database integration
-- [ ] User authentication
-
-### Long-term Vision
-- [ ] Expand to 50,000+ training images
-- [ ] Add more defect classes
-- [ ] 3D reconstruction
-- [ ] Automated repair cost estimation
-- [ ] Integration with GIS systems
-- [ ] Mobile app (dashcam integration)
 
 ---
 
@@ -607,12 +498,10 @@ in the Software without restriction...
 ## 👤 Contact
 
 **Your Name**  
-📧 Email: your.email@example.com  
-🐙 GitHub: [@yourusername](https://github.com/yourusername)  
-🔗 LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)  
-🌐 Website: [yourwebsite.com](https://yourwebsite.com)
+📧 Email: meenal.sinha09@gmail.com  
+🐙 GitHub: [@MeenalSinha](https://github.com/MeenalSinha)  
 
-**Project Link:** [https://github.com/yourusername/pothole-detection](https://github.com/yourusername/pothole-detection)
+**Project Link:** [https://github.com/MeenalSinha/RoadGuardian-AI](https://github.com/MeenalSinha/RoadGuardian-AI)
 
 ### Support
 
@@ -660,17 +549,6 @@ If you use this project in your research or work, please cite:
   note={mAP@0.5: 81.86\%, 18,717 training images}
 }
 ```
-
----
-
-## 📊 Project Stats
-
-![GitHub stars](https://img.shields.io/github/stars/yourusername/pothole-detection?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/pothole-detection?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/yourusername/pothole-detection?style=social)
-![GitHub issues](https://img.shields.io/github/issues/yourusername/pothole-detection)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/yourusername/pothole-detection)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/pothole-detection)
 
 ---
 
