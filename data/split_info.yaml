@@ -1,0 +1,4 @@
+random_seed: 42
+stratified: false
+train_ratio: 0.8
+val_ratio: 0.2

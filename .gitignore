@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+venv/
+env/
+data/raw/*
+data/processed/*
+model/*.pt
+model/*.onnx
+outputs/*
+!outputs/.gitkeep
+.kaggle/
+kaggle.json
+.DS_Store
+Thumbs.db

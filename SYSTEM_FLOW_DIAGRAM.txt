@@ -1,0 +1,746 @@
+================================================================================
+ROADGUARDIAN AI - SYSTEM FLOW DIAGRAM
+================================================================================
+
+                    COMPLETE SYSTEM FLOW DIAGRAM
+                    =============================
+
+
+================================================================================
+1. WEB APPLICATION FLOW (Streamlit Interface)
+================================================================================
+
+START: User Opens Application
+│
+├─▶ [LOAD] Streamlit App Initialization
+│   │
+│   ├─▶ Load configuration
+│   ├─▶ Initialize session state
+│   └─▶ Cache model loading (@st.cache_resource)
+│       │
+│       └─▶ Load YOLOv8n model from model/best.pt
+│           │
+│           ├─▶ Success: Model loaded (6MB, 3.2M params)
+│           └─▶ Error: Display error message
+│
+├─▶ [DISPLAY] Render User Interface
+│   │
+│   ├─▶ Header & Title
+│   ├─▶ Sidebar (Settings Panel)
+│   │   │
+│   │   ├─▶ Confidence Threshold Slider (0.05-0.50, default: 0.15)
+│   │   ├─▶ IOU Threshold Slider (0.3-0.7, default: 0.45)
+│   │   ├─▶ Visualization Options
+│   │   └─▶ Model Performance Info
+│   │
+│   └─▶ Main Panel (Image Upload Area)
+│
+├─▶ [USER ACTION] Image Upload
+│   │
+│   ├─▶ User selects image (JPG/PNG/JPEG)
+│   │   │
+│   │   ├─▶ File uploaded successfully
+│   │   │   │
+│   │   │   └─▶ Store in session state
+│   │   │       │
+│   │   │       └─▶ Display original image
+│   │   │
+│   │   └─▶ Upload failed
+│   │       │
+│   │       └─▶ Show error message
+│   │
+│   └─▶ Proceed to processing
+│
+├─▶ [PREPROCESS] Image Preparation
+│   │
+│   ├─▶ Read image with OpenCV
+│   │   └─▶ Convert to BGR format
+│   │
+│   ├─▶ Validate image
+│   │   ├─▶ Check dimensions
+│   │   ├─▶ Check format
+│   │   └─▶ Check size
+│   │
+│   └─▶ Image ready for detection
+│
+├─▶ [DETECT] Run YOLOv8 Inference
+│   │
+│   ├─▶ Prepare input
+│   │   ├─▶ Resize to 640x640
+│   │   ├─▶ Normalize pixel values
+│   │   └─▶ Format for model input
+│   │
+│   ├─▶ Model prediction
+│   │   │
+│   │   ├─▶ model.predict(
+│   │   │       image,
+│   │   │       conf=confidence_threshold,
+│   │   │       iou=iou_threshold,
+│   │   │       device='cuda' or 'cpu',
+│   │   │       imgsz=640,
+│   │   │       max_det=300
+│   │   │   )
+│   │   │
+│   │   └─▶ Inference time: ~2.4ms
+│   │       │
+│   │       └─▶ Return results object
+│   │
+│   └─▶ Extract detections
+│       │
+│       ├─▶ For each detection:
+│       │   ├─▶ Bounding box coordinates (x1, y1, x2, y2)
+│       │   ├─▶ Confidence score
+│       │   ├─▶ Class ID (0=pothole, 1=crack, 2=damage)
+│       │   └─▶ Calculate area
+│       │
+│       └─▶ Total detections: N boxes
+│
+├─▶ [ANALYZE] Post-Processing & Analytics
+│   │
+│   ├─▶ Filter by confidence threshold
+│   │   └─▶ Keep only boxes with conf >= threshold
+│   │
+│   ├─▶ Calculate severity for each detection
+│   │   │
+│   │   ├─▶ Severity = f(area, confidence, class)
+│   │   │   │
+│   │   │   ├─▶ Critical: Large + High confidence
+│   │   │   ├─▶ Moderate: Medium size/confidence
+│   │   │   └─▶ Minor: Small + Low confidence
+│   │   │
+│   │   └─▶ Assign severity score (0-1)
+│   │
+│   ├─▶ Calculate RCI (Road Condition Index)
+│   │   │
+│   │   └─▶ RCI = 100 - (weighted_sum of detections)
+│   │       │
+│   │       ├─▶ Weight by class (pothole=high, crack=low)
+│   │       ├─▶ Weight by severity
+│   │       └─▶ Normalize to 0-100 scale
+│   │
+│   ├─▶ Generate statistics
+│   │   │
+│   │   ├─▶ Count by class
+│   │   ├─▶ Average confidence
+│   │   ├─▶ Confidence distribution
+│   │   └─▶ Severity breakdown
+│   │
+│   └─▶ Create visualizations
+│       │
+│       ├─▶ Annotated image (bounding boxes)
+│       ├─▶ Confidence histogram
+│       ├─▶ Class distribution pie chart
+│       └─▶ Severity heatmap (optional)
+│
+├─▶ [DISPLAY] Show Results
+│   │
+│   ├─▶ Original Image (left column)
+│   │
+│   ├─▶ Detection Results (right column)
+│   │   │
+│   │   ├─▶ Annotated image with boxes
+│   │   │   └─▶ Color-coded by class
+│   │   │
+│   │   ├─▶ Detection summary
+│   │   │   ├─▶ Total detections: N
+│   │   │   ├─▶ Potholes: X
+│   │   │   ├─▶ Cracks: Y
+│   │   │   └─▶ Damage: Z
+│   │   │
+│   │   ├─▶ RCI Score
+│   │   │   └─▶ Score + Status (Good/Fair/Poor)
+│   │   │
+│   │   └─▶ Charts & Visualizations
+│   │
+│   └─▶ Download Options
+│       │
+│       ├─▶ Annotated Image (PNG)
+│       ├─▶ Detection Data (JSON)
+│       └─▶ Statistics Report (CSV)
+│
+└─▶ [END] User can:
+    │
+    ├─▶ Upload another image
+    ├─▶ Adjust settings
+    └─▶ Download results
+
+
+================================================================================
+2. TRAINING PIPELINE FLOW (pothole_detection_pipeline.py)
+================================================================================
+
+START: Train New Model
+│
+├─▶ [SETUP] Environment Preparation
+│   │
+│   ├─▶ Check GPU availability
+│   │   ├─▶ CUDA available: Use GPU
+│   │   └─▶ CUDA not available: Use CPU (slower)
+│   │
+│   ├─▶ Load configuration
+│   │   ├─▶ Epochs: 100-150
+│   │   ├─▶ Batch size: 8-16
+│   │   ├─▶ Learning rate: 0.001
+│   │   └─▶ Image size: 640
+│   │
+│   └─▶ Create output directories
+│
+├─▶ [DATA] Dataset Preparation
+│   │
+│   ├─▶ Load dataset.yaml
+│   │   │
+│   │   └─▶ Contains:
+│   │       ├─▶ Path to data
+│   │       ├─▶ Train/val splits
+│   │       └─▶ Class names
+│   │
+│   ├─▶ Verify dataset
+│   │   │
+│   │   ├─▶ Check train images: 14,956 ✓
+│   │   ├─▶ Check val images: 3,761 ✓
+│   │   ├─▶ Total: 18,717 images ✓
+│   │   └─▶ Check label files exist ✓
+│   │
+│   └─▶ Data augmentation setup
+│       │
+│       ├─▶ Mosaic augmentation (1.0)
+│       ├─▶ Mixup augmentation (0.1)
+│       ├─▶ HSV color jitter
+│       ├─▶ Horizontal flip (0.5)
+│       ├─▶ Rotation (±10°)
+│       └─▶ Scale (0.5-1.5x)
+│
+├─▶ [MODEL] Initialize YOLOv8n
+│   │
+│   ├─▶ Load pretrained weights (yolov8n.pt)
+│   │   └─▶ Transfer learning from COCO
+│   │
+│   └─▶ Model architecture:
+│       ├─▶ Backbone: CSPDarknet
+│       ├─▶ Neck: PANet
+│       ├─▶ Head: Detection head
+│       └─▶ Classes: 3 (pothole, crack, damage)
+│
+├─▶ [TRAIN] Training Loop
+│   │
+│   └─▶ For each epoch (1 to 150):
+│       │
+│       ├─▶ [TRAIN PHASE]
+│       │   │
+│       │   ├─▶ For each batch:
+│       │   │   │
+│       │   │   ├─▶ Load batch (8-16 images)
+│       │   │   ├─▶ Apply augmentations
+│       │   │   ├─▶ Forward pass
+│       │   │   ├─▶ Calculate losses:
+│       │   │   │   ├─▶ Box loss (localization)
+│       │   │   │   ├─▶ Class loss (classification)
+│       │   │   │   └─▶ DFL loss (distribution)
+│       │   │   ├─▶ Backward pass
+│       │   │   ├─▶ Update weights
+│       │   │   └─▶ Log metrics
+│       │   │
+│       │   └─▶ Epoch train loss calculated
+│       │
+│       ├─▶ [VALIDATION PHASE]
+│       │   │
+│       │   ├─▶ For each validation batch:
+│       │   │   │
+│       │   │   ├─▶ Load batch
+│       │   │   ├─▶ Forward pass (no augmentation)
+│       │   │   ├─▶ Calculate predictions
+│       │   │   └─▶ Compare with ground truth
+│       │   │
+│       │   ├─▶ Calculate metrics:
+│       │   │   ├─▶ Precision
+│       │   │   ├─▶ Recall
+│       │   │   ├─▶ mAP@0.5
+│       │   │   ├─▶ mAP@0.5:0.95
+│       │   │   └─▶ F1 Score
+│       │   │
+│       │   └─▶ Validation loss calculated
+│       │
+│       ├─▶ [CHECKPOINT]
+│       │   │
+│       │   ├─▶ If best mAP so far:
+│       │   │   └─▶ Save as best.pt
+│       │   │
+│       │   └─▶ Save as last.pt
+│       │
+│       ├─▶ [LOG] Record progress
+│       │   │
+│       │   ├─▶ Print epoch summary
+│       │   ├─▶ Update results.csv
+│       │   ├─▶ Save training curves
+│       │   └─▶ Log to tensorboard (optional)
+│       │
+│       └─▶ [CHECK] Early stopping
+│           │
+│           ├─▶ If no improvement for 50 epochs:
+│           │   └─▶ Stop training
+│           │
+│           └─▶ Continue to next epoch
+│
+├─▶ [EVALUATE] Final Evaluation
+│   │
+│   ├─▶ Load best.pt model
+│   │
+│   ├─▶ Run on validation set
+│   │   │
+│   │   └─▶ Calculate final metrics:
+│   │       ├─▶ mAP@0.5: 81.86% ✓
+│   │       ├─▶ Precision: 79.15% ✓
+│   │       ├─▶ Recall: 76.55% ✓
+│   │       └─▶ F1 Score: 77.83% ✓
+│   │
+│   ├─▶ Generate visualizations
+│   │   ├─▶ Confusion matrix
+│   │   ├─▶ Training curves
+│   │   ├─▶ PR curves
+│   │   └─▶ Sample predictions
+│   │
+│   └─▶ Save results
+│       ├─▶ metrics_summary.json
+│       ├─▶ confusion_matrix.png
+│       └─▶ results.csv
+│
+└─▶ [END] Training Complete
+    │
+    ├─▶ Model saved: model/best.pt
+    ├─▶ Ready for deployment
+    └─▶ Performance verified: 81.86% mAP ✓
+
+
+================================================================================
+3. INFERENCE PIPELINE FLOW (Detailed Detection Process)
+================================================================================
+
+START: Single Image Detection
+│
+├─▶ [INPUT] Image Received
+│   │
+│   ├─▶ Source: Upload / File / Camera
+│   ├─▶ Format: JPG / PNG / JPEG
+│   └─▶ Size: Any (will be resized)
+│
+├─▶ [VALIDATE] Input Validation
+│   │
+│   ├─▶ Check if file exists
+│   ├─▶ Check if valid image format
+│   ├─▶ Check file size (< 10MB recommended)
+│   │
+│   ├─▶ Valid: Continue
+│   └─▶ Invalid: Return error
+│
+├─▶ [LOAD] Read Image
+│   │
+│   ├─▶ cv2.imread(image_path)
+│   ├─▶ Check if image loaded
+│   └─▶ Get original dimensions (H x W)
+│
+├─▶ [PREPROCESS] Image Preprocessing
+│   │
+│   ├─▶ STEP 1: Format Conversion
+│   │   └─▶ BGR → RGB (if needed)
+│   │
+│   ├─▶ STEP 2: Resize
+│   │   └─▶ Original (HxW) → 640x640
+│   │       └─▶ Maintain aspect ratio with padding
+│   │
+│   ├─▶ STEP 3: Normalize
+│   │   └─▶ Pixel values: [0-255] → [0-1]
+│   │
+│   └─▶ STEP 4: Tensor Conversion
+│       └─▶ numpy array → torch tensor
+│           └─▶ Shape: [1, 3, 640, 640]
+│
+├─▶ [INFERENCE] Model Forward Pass
+│   │
+│   ├─▶ Load model to device (GPU/CPU)
+│   │
+│   ├─▶ BACKBONE: Feature Extraction
+│   │   │
+│   │   ├─▶ Input: [1, 3, 640, 640]
+│   │   │
+│   │   ├─▶ Conv layers + CSPNet blocks
+│   │   │
+│   │   └─▶ Multi-scale features:
+│   │       ├─▶ P3: 80x80 (small objects)
+│   │       ├─▶ P4: 40x40 (medium objects)
+│   │       └─▶ P5: 20x20 (large objects)
+│   │
+│   ├─▶ NECK: Feature Pyramid
+│   │   │
+│   │   ├─▶ PANet fusion
+│   │   ├─▶ Top-down pathway
+│   │   ├─▶ Bottom-up pathway
+│   │   │
+│   │   └─▶ Enhanced features at all scales
+│   │
+│   ├─▶ HEAD: Detection
+│   │   │
+│   │   ├─▶ For each scale:
+│   │   │   ├─▶ Predict bounding boxes
+│   │   │   ├─▶ Predict class probabilities
+│   │   │   └─▶ Predict confidence scores
+│   │   │
+│   │   └─▶ Raw predictions: [N, 85]
+│   │       └─▶ [x, y, w, h, conf, cls0, cls1, cls2, ...]
+│   │
+│   └─▶ Inference time: ~2.4ms ⚡
+│
+├─▶ [POSTPROCESS] Non-Maximum Suppression (NMS)
+│   │
+│   ├─▶ STEP 1: Confidence Filtering
+│   │   │
+│   │   └─▶ Remove boxes with conf < threshold (0.15)
+│   │       └─▶ Keep only confident detections
+│   │
+│   ├─▶ STEP 2: Class Assignment
+│   │   │
+│   │   └─▶ For each box:
+│   │       ├─▶ Get max class probability
+│   │       └─▶ Assign class ID (0/1/2)
+│   │
+│   ├─▶ STEP 3: Non-Maximum Suppression
+│   │   │
+│   │   └─▶ For each class:
+│   │       │
+│   │       ├─▶ Sort boxes by confidence
+│   │       │
+│   │       └─▶ Remove overlapping boxes:
+│   │           │
+│   │           ├─▶ Calculate IoU between boxes
+│   │           ├─▶ If IoU > threshold (0.45):
+│   │           │   └─▶ Keep highest confidence box
+│   │           │       └─▶ Remove others
+│   │           │
+│   │           └─▶ Repeat for all boxes
+│   │
+│   ├─▶ STEP 4: Coordinate Transformation
+│   │   │
+│   │   └─▶ Convert from 640x640 to original size
+│   │       └─▶ Scale coordinates back
+│   │
+│   └─▶ RESULT: Clean detections
+│       └─▶ [N filtered boxes]
+│
+├─▶ [ANALYZE] Detection Analysis
+│   │
+│   ├─▶ For each detection:
+│   │   │
+│   │   ├─▶ Extract information:
+│   │   │   ├─▶ Class: pothole/crack/damage
+│   │   │   ├─▶ Confidence: 0.02-0.88
+│   │   │   ├─▶ Bounding box: [x1,y1,x2,y2]
+│   │   │   └─▶ Area: (x2-x1) × (y2-y1)
+│   │   │
+│   │   ├─▶ Calculate severity:
+│   │   │   │
+│   │   │   ├─▶ Factors:
+│   │   │   │   ├─▶ Area (size of defect)
+│   │   │   │   ├─▶ Confidence score
+│   │   │   │   └─▶ Class type
+│   │   │   │
+│   │   │   └─▶ Severity classification:
+│   │   │       ├─▶ Critical (0.8-1.0)
+│   │   │       ├─▶ Moderate (0.5-0.8)
+│   │   │       └─▶ Minor (0.0-0.5)
+│   │   │
+│   │   └─▶ Store detection data:
+│   │       {
+│   │         'class': 'pothole',
+│   │         'confidence': 0.85,
+│   │         'bbox': [100, 200, 300, 400],
+│   │         'area': 40000,
+│   │         'severity': 'Critical',
+│   │         'severity_score': 0.9
+│   │       }
+│   │
+│   ├─▶ Calculate statistics:
+│   │   │
+│   │   ├─▶ Total detections: N
+│   │   ├─▶ Count by class:
+│   │   │   ├─▶ Potholes: X
+│   │   │   ├─▶ Cracks: Y
+│   │   │   └─▶ Damage: Z
+│   │   │
+│   │   ├─▶ Confidence stats:
+│   │   │   ├─▶ Mean: μ
+│   │   │   ├─▶ Max: max
+│   │   │   └─▶ Distribution: histogram
+│   │   │
+│   │   └─▶ Severity breakdown:
+│   │       ├─▶ Critical: n1
+│   │       ├─▶ Moderate: n2
+│   │       └─▶ Minor: n3
+│   │
+│   └─▶ Calculate RCI:
+│       │
+│       └─▶ RCI = 100 - Σ(weight × severity × count)
+│           │
+│           ├─▶ Weights by class:
+│           │   ├─▶ Pothole: 3.0
+│           │   ├─▶ Crack: 1.0
+│           │   └─▶ Damage: 2.0
+│           │
+│           └─▶ Result: 0-100 scale
+│               ├─▶ 80-100: Good
+│               ├─▶ 60-79: Fair
+│               ├─▶ 40-59: Poor
+│               └─▶ 0-39: Very Poor
+│
+├─▶ [VISUALIZE] Create Annotations
+│   │
+│   ├─▶ Copy original image
+│   │
+│   ├─▶ For each detection:
+│   │   │
+│   │   ├─▶ Draw bounding box:
+│   │   │   ├─▶ Color by class
+│   │   │   └─▶ Thickness: 3px
+│   │   │
+│   │   ├─▶ Draw label background:
+│   │   │   └─▶ Filled rectangle above box
+│   │   │
+│   │   └─▶ Draw text label:
+│   │       └─▶ "class | confidence%"
+│   │
+│   ├─▶ Add summary text (optional):
+│   │   └─▶ "Found N defects | RCI: XX"
+│   │
+│   └─▶ Save annotated image
+│
+├─▶ [EXPORT] Prepare Results
+│   │
+│   ├─▶ JSON format:
+│   │   {
+│   │     "total_detections": N,
+│   │     "rci_score": 75.5,
+│   │     "classes": {
+│   │       "pothole": X,
+│   │       "crack": Y,
+│   │       "damage": Z
+│   │     },
+│   │     "detections": [...]
+│   │   }
+│   │
+│   ├─▶ CSV format:
+│   │   class,confidence,x1,y1,x2,y2,severity
+│   │   pothole,0.85,100,200,300,400,Critical
+│   │   ...
+│   │
+│   └─▶ Images:
+│       ├─▶ Annotated image (PNG)
+│       └─▶ Heatmap (optional)
+│
+└─▶ [RETURN] Final Results
+    │
+    ├─▶ Annotated image
+    ├─▶ Detection list
+    ├─▶ Statistics
+    ├─▶ RCI score
+    └─▶ Exportable data
+
+
+================================================================================
+4. BATCH PROCESSING FLOW
+================================================================================
+
+START: Batch Processing Request
+│
+├─▶ [INPUT] Multiple Images
+│   │
+│   ├─▶ Source: Folder / Upload / API
+│   └─▶ Count: N images
+│
+├─▶ [VALIDATE] Check All Images
+│   │
+│   └─▶ For each image:
+│       ├─▶ Valid: Add to batch
+│       └─▶ Invalid: Log error, skip
+│
+├─▶ [PROCESS] Batch Inference
+│   │
+│   ├─▶ Option 1: Sequential Processing
+│   │   │
+│   │   └─▶ For each image:
+│   │       ├─▶ Run single inference
+│   │       ├─▶ Collect results
+│   │       └─▶ Update progress (i/N)
+│   │
+│   └─▶ Option 2: Batch Inference (Faster)
+│       │
+│       ├─▶ Group images into batches (8-16)
+│       │
+│       └─▶ For each batch:
+│           ├─▶ Preprocess all images
+│           ├─▶ Run model on batch
+│           ├─▶ Postprocess results
+│           └─▶ Store all detections
+│
+├─▶ [AGGREGATE] Combine Results
+│   │
+│   ├─▶ Total detections across all images
+│   ├─▶ Average RCI score
+│   ├─▶ Overall statistics
+│   └─▶ Per-image breakdown
+│
+├─▶ [EXPORT] Save Results
+│   │
+│   ├─▶ Individual annotated images
+│   ├─▶ Combined statistics (CSV)
+│   ├─▶ Summary report (JSON)
+│   └─▶ Visualization dashboard
+│
+└─▶ [END] Batch Complete
+    └─▶ Return summary and download links
+
+
+================================================================================
+5. API ENDPOINT FLOW (Future/Optional)
+================================================================================
+
+START: API Request
+│
+├─▶ [RECEIVE] POST /predict
+│   │
+│   ├─▶ Headers: Content-Type, Authorization
+│   ├─▶ Body: Image file or base64
+│   └─▶ Parameters: conf, iou, save
+│
+├─▶ [AUTHENTICATE] Validate API Key
+│   │
+│   ├─▶ Valid: Continue
+│   └─▶ Invalid: Return 401 Unauthorized
+│
+├─▶ [PARSE] Extract Image
+│   │
+│   ├─▶ From multipart/form-data
+│   └─▶ Or decode base64
+│
+├─▶ [DETECT] Run Inference
+│   │
+│   └─▶ (Same as inference pipeline above)
+│
+├─▶ [FORMAT] Prepare Response
+│   │
+│   └─▶ {
+│         "status": "success",
+│         "detections": N,
+│         "rci": 75.5,
+│         "results": [...],
+│         "inference_time": 0.0024
+│       }
+│
+└─▶ [RESPOND] Return JSON
+    │
+    ├─▶ Status: 200 OK
+    └─▶ Body: Detection results
+
+
+================================================================================
+6. ERROR HANDLING FLOW
+================================================================================
+
+Error Detected
+│
+├─▶ [IDENTIFY] Error Type
+│   │
+│   ├─▶ File Error:
+│   │   ├─▶ File not found
+│   │   ├─▶ Invalid format
+│   │   └─▶ Corrupted file
+│   │
+│   ├─▶ Model Error:
+│   │   ├─▶ Model not loaded
+│   │   ├─▶ Out of memory
+│   │   └─▶ CUDA error
+│   │
+│   ├─▶ Processing Error:
+│   │   ├─▶ Invalid dimensions
+│   │   ├─▶ Processing timeout
+│   │   └─▶ Unexpected format
+│   │
+│   └─▶ System Error:
+│       ├─▶ Disk full
+│       ├─▶ Permission denied
+│       └─▶ Network error
+│
+├─▶ [LOG] Record Error
+│   │
+│   ├─▶ Timestamp
+│   ├─▶ Error type
+│   ├─▶ Stack trace
+│   └─▶ Input context
+│
+├─▶ [NOTIFY] User Notification
+│   │
+│   ├─▶ Display error message
+│   ├─▶ Suggest solution
+│   └─▶ Provide error code
+│
+├─▶ [RECOVER] Attempt Recovery
+│   │
+│   ├─▶ Retry operation
+│   ├─▶ Use fallback
+│   └─▶ Reset state
+│
+└─▶ [CONTINUE] Resume Operation
+    │
+    ├─▶ Success: Continue
+    └─▶ Failure: Escalate
+
+
+================================================================================
+7. DEPLOYMENT FLOW
+================================================================================
+
+START: Deploy Application
+│
+├─▶ [PREPARE] Pre-deployment
+│   │
+│   ├─▶ Test model performance
+│   ├─▶ Verify dependencies
+│   ├─▶ Check configuration
+│   └─▶ Prepare documentation
+│
+├─▶ [PACKAGE] Create Container (Docker)
+│   │
+│   ├─▶ Build Docker image
+│   ├─▶ Include all dependencies
+│   ├─▶ Copy model file
+│   └─▶ Configure entry point
+│
+├─▶ [DEPLOY] Launch Service
+│   │
+│   ├─▶ Local:
+│   │   └─▶ streamlit run app.py
+│   │
+│   ├─▶ Cloud:
+│   │   ├─▶ Push to registry
+│   │   ├─▶ Deploy to server
+│   │   └─▶ Configure load balancer
+│   │
+│   └─▶ Edge:
+│       ├─▶ Convert to ONNX/TensorRT
+│       └─▶ Deploy to edge device
+│
+├─▶ [MONITOR] Health Checks
+│   │
+│   ├─▶ Service status
+│   ├─▶ Response time
+│   ├─▶ Error rate
+│   └─▶ Resource usage
+│
+└─▶ [MAINTAIN] Ongoing Operations
+    │
+    ├─▶ Monitor performance
+    ├─▶ Update model (as needed)
+    ├─▶ Scale resources
+    └─▶ Handle incidents
+
+
+================================================================================
+END OF SYSTEM FLOW DIAGRAM
+================================================================================
