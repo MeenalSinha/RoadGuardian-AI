@@ -1,0 +1,9 @@
+{
+  "final_epoch": 150,
+  "final_metrics": {
+    "mAP50": 0.81862,
+    "mAP50-95": 0.52739,
+    "precision": 0.79152,
+    "recall": 0.76554
+  }
+}
