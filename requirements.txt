@@ -1,32 +1,34 @@
 # ============================================================================
-# Road Pothole Detection - Python Dependencies
+# Road Pothole Detection - Python Dependencies (Streamlit Cloud Optimized)
 # ============================================================================
-# Installation: pip install -r requirements.txt
-# Tested on: Python 3.10+
+# Minimal dependencies for deployment
 
+# Core ML/CV
 torch
 torchvision
 ultralytics
-opencv-python
-opencv-contrib-python
+opencv-python-headless
 Pillow
+
+# Data Processing
 numpy
 pandas
 scikit-learn
 scipy
+
+# Visualization
 matplotlib
 seaborn
+plotly
+pydeck
+
+# Augmentation (optional - remove if not needed)
 albumentations
-imgaug
+
+# Utilities
 pyyaml
-python-dotenv
 tqdm
-colorama
-kaggle
-gdown
 requests
-onnx
-onnxruntime
-#onnxsim
-pathlib
-argparse
+
+# Streamlit (should be auto-installed but including for safety)
+streamlit
