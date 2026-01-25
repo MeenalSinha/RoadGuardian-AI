@@ -32,3 +32,5 @@ requests
 
 # Streamlit (should be auto-installed but including for safety)
 streamlit
+
+altair
